@@ -8,10 +8,7 @@
             "archivedLogFilenamePattern" : "logs/uploader-%d.log.gz",
             "archivedFileCount": 10,
             "timeZone": "UTC"
-            },
-            { 
-             "type" : "console"
-             }
+            }
        ]
    },
    "server": {
