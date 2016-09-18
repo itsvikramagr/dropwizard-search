@@ -1,0 +1,26 @@
+{
+  "logging": {
+      "level": "INFO",
+      "appenders": [
+            {
+            "type": "file",
+            "currentLogFilename" : "logs/uploader.log",
+            "archivedLogFilenamePattern" : "logs/uploader-%d.log.gz",
+            "archivedFileCount": 10,
+            "timeZone": "UTC"
+            },
+            { 
+             "type" : "console"
+             }
+       ]
+   },
+   "server": {
+      "type":   "simple",
+      "applicationContextPath": "/api",
+      "adminContextPath": "/admin",
+      "connector": {
+            "type": "http",
+            "port": 8000
+       }
+    }
+}
