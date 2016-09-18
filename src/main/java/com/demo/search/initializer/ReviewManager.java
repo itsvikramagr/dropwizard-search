@@ -70,6 +70,7 @@ public class ReviewManager {
     LOG.info("Number of reviews considered for search {}", reviewDocs.size());
   }
 
+<<<<<<< HEAD
   public void processDoc(Map<Integer, ReviewDocument> reviewDocs, Map<String, Set<Integer>> tokenMap) {
     for (Map.Entry<Integer, ReviewDocument> entry : reviewDocs.entrySet()){
       Integer docId=entry.getKey();
@@ -99,6 +100,42 @@ public class ReviewManager {
       }
     }
   }
+=======
+	public void processDoc(Map<Integer, ReviewDocument> reviewDocs, Map<String, Set<Integer>> tokenMap) {
+		for (Map.Entry<Integer, ReviewDocument> entry : reviewDocs.entrySet()){
+			Integer docId=entry.getKey();
+			ReviewDocument rd = entry.getValue();
+			// tokenize summary
+			Set<String> tokens = new HashSet<String>();
+			for (String t : rd.getSummary().split("\\s+")){
+				t= t.replaceAll("[^A-Za-z ]", "");
+				if (t.length() >0 && !ignoreList.contains(t.toLowerCase())) {
+					tokens.add(t.toLowerCase());					
+				}
+			}
+			for (String t : rd.getText().split("\\s+")){
+				t= t.replaceAll("[^A-Za-z ]", "");
+				if (t.length()>0 && !ignoreList.contains(t.toLowerCase())) {
+					tokens.add(t.toLowerCase());					
+				}
+			}	
+			for (String t : tokens){
+				//TODO remove trailing and ending comma or double quotes
+				if (!tokenMap.containsKey(t)) {
+					Set<Integer> newtokenSet = new HashSet<Integer>();
+					tokenMap.put(t, newtokenSet);
+				}
+				Set<Integer> tokenSet = tokenMap.get(t);
+				tokenSet.add(docId);
+			}
+		}
+	}
+
+	public void generateQuerySet(Map<String, Set<Integer>> tokenMap, Integer numQuery) {
+		Object[] tokens = tokenMap.keySet().toArray();
+		Integer num = tokens.length;
+		File file = new File("querySet.txt");
+>>>>>>> 309d251ff34f05c77131254ec97a8764a7ff234a
 
   public void generateQuerySet(Map<String, Set<Integer>> tokenMap, Integer numQuery) {
     Object[] tokens = tokenMap.keySet().toArray();
@@ -150,6 +187,7 @@ public class ReviewManager {
     }
   }
 
+<<<<<<< HEAD
   public ArrayList<Integer> reviewSearch(String[] tokenList, Map<Integer, ReviewDocument> reviewDocs, Map<String, Set<Integer>> tokenMap) {
     Map<Integer, Set<Integer>> scoreMap = searchToken(tokenList, tokenMap);
     int size = 0;
@@ -213,6 +251,74 @@ public class ReviewManager {
           if (ts.size() > 0 && matched.size() > 0) {
             ts.removeAll(matched); // (B - A intersection B)
           }
+=======
+	public Map<Integer, Set<Integer>> searchToken(String[] tokens, Map<String, Set<Integer>> tokenMap ) {
+		Map<Integer, Set<Integer>> scoreMap = new HashMap<Integer, Set<Integer>>();
+		Integer maxScore = 0;
+		scoreMap.put(maxScore,new HashSet<Integer>());
+		for (int i=0; i< tokens.length; i++) {
+			if (tokenMap.containsKey(tokens[i].trim().toLowerCase())) {
+				Set<Integer> tokenSet = tokenMap.get(tokens[i].trim().toLowerCase());  // B
+				Set<Integer> ts = new HashSet<Integer>();
+				ts.add(-1);
+				if (tokenSet.size() > 0 ) {
+					ts.addAll(tokenSet);
+				}
+				ts.remove(-1);
+				LOG.info("Checking for token: {}", tokens[i].trim());
+				for (int j = maxScore; j>=0; j--) {
+					Set<Integer> docMap = scoreMap.get(j);
+					Set<Integer> matched = new HashSet<Integer>(); // A
+					matched.add(-1);
+					if (docMap.size() > 0) {
+						matched.addAll(docMap); 
+					}
+					matched.remove(-1);
+
+					// get intersection of matched with new tokenSet
+					if (matched.size() > 0) {
+						matched.retainAll(ts);  // A intersection B	
+					} 
+					if (docMap.size() > 0 && matched.size() > 0) {
+						docMap.removeAll(matched);  // (A - (A intersection B)).
+					}				
+					if (ts.size() > 0 && matched.size() > 0) {
+						ts.removeAll(matched); // (B - A intersection B)
+					}
+
+					if (!scoreMap.containsKey(j+1)) {
+						Set<Integer> matchedDocId = new HashSet<Integer>(); 
+						scoreMap.put(j+1, matchedDocId);
+						maxScore++;
+					}
+					Set<Integer> matchedDocId = scoreMap.get(j+1);
+					if (matched.size() > 0) {
+						if (matchedDocId.size() > 0) {
+							matchedDocId.addAll(matched);
+						}
+						else {
+							matchedDocId.add(-1);
+							matchedDocId.addAll(matched);
+							matchedDocId.remove(-1);
+						}
+					}
+					scoreMap.put(j+1, matchedDocId);
+				}
+				Set<Integer> matchedDocId = scoreMap.get(1);
+				if (ts.size() > 0 ) {
+					if (matchedDocId.size() > 0) {
+						matchedDocId.addAll(ts);
+					}
+					else {
+						matchedDocId = ts;
+					}
+				}
+				scoreMap.put(1, matchedDocId);
+			}
+		}
+		return scoreMap;
+	}
+>>>>>>> 309d251ff34f05c77131254ec97a8764a7ff234a
 
           if (!scoreMap.containsKey(j+1)) {
             Set<Integer> matchedDocId = new HashSet<Integer>(); 
