@@ -99,7 +99,7 @@ public class ReviewManager {
 			}
 		}
 	}
-	
+
 	public void generateQuerySet(Map<String, Set<Integer>> tokenMap, Integer numQuery) {
 		Object[] tokens = tokenMap.keySet().toArray();
 		Integer num = tokens.length;
@@ -183,62 +183,64 @@ public class ReviewManager {
 		Integer maxScore = 0;
 		scoreMap.put(maxScore,new HashSet<Integer>());
 		for (int i=0; i< tokens.length; i++) {
-			Set<Integer> tokenSet = tokenMap.get(tokens[i].trim().toLowerCase());  // B
-			Set<Integer> ts = new HashSet<Integer>();
-			ts.add(-1);
-			if (tokenSet.size() > 0 ) {
-				ts.addAll(tokenSet);
-			}
-			ts.remove(-1);
-			LOG.info("Checking for token: {}", tokens[i].trim());
-			for (int j = maxScore; j>=0; j--) {
-				Set<Integer> docMap = scoreMap.get(j);
-				Set<Integer> matched = new HashSet<Integer>(); // A
-				matched.add(-1);
-				if (docMap.size() > 0) {
-					matched.addAll(docMap); 
+			if (tokenMap.containsKey(tokens[i].trim().toLowerCase())) {
+				Set<Integer> tokenSet = tokenMap.get(tokens[i].trim().toLowerCase());  // B
+				Set<Integer> ts = new HashSet<Integer>();
+				ts.add(-1);
+				if (tokenSet.size() > 0 ) {
+					ts.addAll(tokenSet);
 				}
-				matched.remove(-1);
+				ts.remove(-1);
+				LOG.info("Checking for token: {}", tokens[i].trim());
+				for (int j = maxScore; j>=0; j--) {
+					Set<Integer> docMap = scoreMap.get(j);
+					Set<Integer> matched = new HashSet<Integer>(); // A
+					matched.add(-1);
+					if (docMap.size() > 0) {
+						matched.addAll(docMap); 
+					}
+					matched.remove(-1);
 
-				// get intersection of matched with new tokenSet
-				if (matched.size() > 0) {
-					matched.retainAll(ts);  // A intersection B	
-				} 
-				if (docMap.size() > 0 && matched.size() > 0) {
-					docMap.removeAll(matched);  // (A - (A intersection B)).
-				}				
-				if (ts.size() > 0 && matched.size() > 0) {
-					ts.removeAll(matched); // (B - A intersection B)
-				}
+					// get intersection of matched with new tokenSet
+					if (matched.size() > 0) {
+						matched.retainAll(ts);  // A intersection B	
+					} 
+					if (docMap.size() > 0 && matched.size() > 0) {
+						docMap.removeAll(matched);  // (A - (A intersection B)).
+					}				
+					if (ts.size() > 0 && matched.size() > 0) {
+						ts.removeAll(matched); // (B - A intersection B)
+					}
 
-				if (!scoreMap.containsKey(j+1)) {
-					Set<Integer> matchedDocId = new HashSet<Integer>(); 
+					if (!scoreMap.containsKey(j+1)) {
+						Set<Integer> matchedDocId = new HashSet<Integer>(); 
+						scoreMap.put(j+1, matchedDocId);
+						maxScore++;
+					}
+					Set<Integer> matchedDocId = scoreMap.get(j+1);
+					if (matched.size() > 0) {
+						if (matchedDocId.size() > 0) {
+							matchedDocId.addAll(matched);
+						}
+						else {
+							matchedDocId.add(-1);
+							matchedDocId.addAll(matched);
+							matchedDocId.remove(-1);
+						}
+					}
 					scoreMap.put(j+1, matchedDocId);
-					maxScore++;
 				}
-				Set<Integer> matchedDocId = scoreMap.get(j+1);
-				if (matched.size() > 0) {
+				Set<Integer> matchedDocId = scoreMap.get(1);
+				if (ts.size() > 0 ) {
 					if (matchedDocId.size() > 0) {
-						matchedDocId.addAll(matched);
+						matchedDocId.addAll(ts);
 					}
 					else {
-						matchedDocId.add(-1);
-						matchedDocId.addAll(matched);
-						matchedDocId.remove(-1);
+						matchedDocId = ts;
 					}
 				}
-				scoreMap.put(j+1, matchedDocId);
+				scoreMap.put(1, matchedDocId);
 			}
-			Set<Integer> matchedDocId = scoreMap.get(1);
-			if (ts.size() > 0 ) {
-				if (matchedDocId.size() > 0) {
-					matchedDocId.addAll(ts);
-				}
-				else {
-					matchedDocId = ts;
-				}
-			}
-			scoreMap.put(1, matchedDocId);
 		}
 		return scoreMap;
 	}
