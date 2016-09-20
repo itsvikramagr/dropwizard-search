@@ -1,7 +1,7 @@
 # dropwizard-search
 A demo project using dropwizard to search reviews
 
-###compile###: 
+###compile ###: 
  `mvn clean install`
 
 ###Start Application ###
@@ -15,6 +15,7 @@ A demo project using dropwizard to search reviews
 `http://localhost:8000/api/v1/search?token=a,b,c`  (comma separated list)
 
 * Generate the query-set
+
 `http://localhost:8000/api/v1/querySet` - generate a file querySet.txt with 100K random queries
 
 
