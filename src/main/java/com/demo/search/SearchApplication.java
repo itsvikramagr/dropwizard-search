@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.demo.search.AppConfiguration;
+import com.demo.search.health.ServiceHealthCheck;
 import com.demo.search.initializer.ReviewManager;
 import com.demo.search.model.ReviewDocument;
 import com.demo.search.resource.SearchResource;
@@ -24,6 +25,7 @@ public class SearchApplication extends Application<AppConfiguration> {
 	@Override
 	public void initialize(Bootstrap<AppConfiguration> bootstrap) {
 		bootstrap.addBundle(new AssetsBundle("/assets", "/ui", "index.html"));
+		
 	}
 
 	private void setUp(AppConfiguration configuration,
@@ -32,9 +34,10 @@ public class SearchApplication extends Application<AppConfiguration> {
 		Map<Integer, ReviewDocument> reviewDocs = new HashMap<Integer, ReviewDocument>();
 		Map<String, Set<Integer>> tokenMap = new HashMap<String, Set<Integer>>();
 		rm.splitFile("finefoods_small3.txt", reviewDocs);
-		rm.processDoc(reviewDocs, tokenMap);		
+		rm.processDoc(reviewDocs, tokenMap);
 	    environment.jersey().register(new SearchResource(rm, reviewDocs, tokenMap));
-	    
+	    environment.healthChecks().register("health", new ServiceHealthCheck());      
+
 }
 
 	@Override

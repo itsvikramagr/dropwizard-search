@@ -14,6 +14,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.regex.*;
 import org.apache.commons.io.IOUtils;
 import com.demo.search.model.ReviewDocument;
@@ -78,13 +79,13 @@ public class ReviewManager {
       Set<String> tokens = new HashSet<String>();
       for (String t : rd.getSummary().split("\\s+")){
         t= t.replaceAll("[^A-Za-z ]", "");
-        if (t.length() >0 && !ignoreList.contains(t.toLowerCase())) {
+        if (t.length() >2 && !ignoreList.contains(t.toLowerCase())) {
           tokens.add(t.toLowerCase());					
         }
       }
       for (String t : rd.getText().split("\\s+")){
         t= t.replaceAll("[^A-Za-z ]", "");
-        if (t.length()>0 && !ignoreList.contains(t.toLowerCase())) {
+        if (t.length()>2 && !ignoreList.contains(t.toLowerCase())) {
           tokens.add(t.toLowerCase());					
         }
       }	
@@ -99,6 +100,7 @@ public class ReviewManager {
       }
     }
   }
+  
   
   public void generateQuerySet(Map<String, Set<Integer>> tokenMap, Integer numQuery) {
     Object[] tokens = tokenMap.keySet().toArray();
@@ -160,7 +162,7 @@ public class ReviewManager {
     for (int i=tokenList.length; i>0; i--) {
       if (scoreMap.containsKey(i)){
         Set<Integer> docMap = scoreMap.get(i);
-        LOG.info(i + " match= {} ", docMap.toString());
+        LOG.debug(i + " match= {} ", docMap.toString());
         if (docMap.size() > 0 ) {
           if (docMap.size() < remaining ) {
             result.addAll(docMap);
@@ -176,10 +178,10 @@ public class ReviewManager {
       }
     }
     result.remove(0);  // remove the first element added by us
-    LOG.info("Final result = {}" , result.toString());	
+    LOG.debug("Final result = {}" , result.toString());	
     return result;
   }
-
+  
   public Map<Integer, Set<Integer>> searchToken(String[] tokens, Map<String, Set<Integer>> tokenMap ) {
     Map<Integer, Set<Integer>> scoreMap = new HashMap<Integer, Set<Integer>>();
     Integer maxScore = 0;
@@ -193,7 +195,7 @@ public class ReviewManager {
           ts.addAll(tokenSet);
         }
         ts.remove(-1);
-        LOG.info("Checking for token: {}", tokens[i].trim());
+        LOG.debug("Checking for token: {}", tokens[i].trim());
         for (int j = maxScore; j>=0; j--) {
           Set<Integer> docMap = scoreMap.get(j);
           Set<Integer> matched = new HashSet<Integer>(); // A

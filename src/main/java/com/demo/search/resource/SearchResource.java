@@ -29,6 +29,7 @@ import com.demo.search.model.ReviewDocument;
 public class SearchResource {
 	private Map<Integer, ReviewDocument> reviewDocs;
 	private Map<String, Set<Integer>> tokenMap;
+        //private Map<String, Integer> tokenCount;
 	private static final Logger LOG = LoggerFactory.getLogger(SearchResource.class);
 	private ReviewManager rm;
 
